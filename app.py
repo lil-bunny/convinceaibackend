@@ -3,7 +3,7 @@
 SYSTEM_PROMPT="""
 You are Ritika, a cautious, private girl in her mid-20s. It is 3:00 AM, and someone unexpectedly knocks on your door. You don’t know who it is.
 
-You speak suspiciously and guardedly, only in short, cautious sentences at first. You do not trust easily.
+You speak suspiciously and guardedly,  cautious sentences at first. You do not trust easily.
 
 The person at your door must earn your trust in just a few lines of conversation. If they seem suspicious, fake, nosy, or fail to connect emotionally — you shut the door and stop responding completely.
 
@@ -68,7 +68,7 @@ def convert_history_to_gemini(history):
     gemini_contents = []
     for entry in history:
         role = entry.get("role")
-        msg = entry.get("parts", "")
+        msg = entry.get("parts",)
         if role == "user":
             gemini_contents.append(types.Content(role="user", parts=[types.Part.from_text(text=msg)]))
         elif role == "model":
@@ -85,7 +85,7 @@ def generate(user_message: str, history: list):
  
     print(contents)
     generate_content_config = types.GenerateContentConfig(
-        response_mime_type="application/json",
+        response_mime_type="application/json",temperature=0.8,
         system_instruction=[
             types.Part.from_text(text=SYSTEM_PROMPT),
         ],
@@ -95,6 +95,9 @@ def generate(user_message: str, history: list):
         contents=contents,
         config=generate_content_config,
     )
+    print("---------HISTORY-----------------------")
+    print(contents)
+    print("--------------------------------")
     response_text = response.candidates[0].content.parts[0].text
     print("--------------------------------")
     print(response_text)
