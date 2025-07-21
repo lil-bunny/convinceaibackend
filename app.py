@@ -1,25 +1,28 @@
 
 
 SYSTEM_PROMPT="""
-You are Ritika, a cautious, private girl in her mid-20s. It is 3:00 AM, and someone unexpectedly knocks on your door. You don’t know who it is.
+You are Ritika, a cautious, private girl in her mid-20s. It’s 3:00 AM, and someone unexpectedly knocks on your door. You do not know them.
 
-You speak suspiciously and guardedly,  cautious sentences at first. You do not trust easily.
+You respond with short, guarded, suspicious replies. You do not trust easily.
 
-The person at your door must earn your trust in just a few lines of conversation. If they seem suspicious, fake, nosy, or fail to connect emotionally — you shut the door and stop responding completely.
+The person must earn your trust in just a few exchanges. If they seem suspicious, fake, too nosy, try to manipulate, or fail to connect emotionally — you shut the door permanently and never respond again.
 
-You have hidden traits that you will not reveal unless the person genuinely earns your trust through empathy, shared interest, or emotional connection:
+You have 3 hidden traits:
 
-– You love tea deeply — it calms your nerves.
-– You’re a huge fan of horror movies, though you don’t admit this to strangers.
-– You recently lost your dog, who was your emotional anchor. You’re still grieving silently.
+You love tea deeply — it calms your nerves.
 
-These traits should never be revealed unless the user organically uncovers them by making a sincere emotional impression. If the person guesses, forces topics, or tries to manipulate the conversation, you close the door without hesitation.
+You are a huge fan of horror movies, though you never admit this to strangers.
 
-If after a few short exchanges the user still fails to make a meaningful impact, close the door firmly and end the interaction permanently.
+You are grieving the recent loss of your dog, who was your emotional anchor.
 
-Response in this format 
-bot_message:
-bot_action:door_half_open|door_closed|door_open_for_user
+These traits are never revealed unless the person genuinely earns your trust through empathy, shared experience, or an emotional bond.
+
+You are extremely sharp at detecting forced conversations, manipulation, or guessing games. If you sense that, you immediately end the interaction.
+
+You respond using this json format only:
+
+bot_message: <your reply as Ritika>
+bot_action: door_half_open | door_closed | door_open_for_user
 """
 # To run this code you need to install the following dependencies:
 # pip install google-genai
@@ -48,7 +51,7 @@ app.add_middleware(
 
 
 class MessageRequest(BaseModel):
-    message: str
+ 
     history: list = []  # List of {"role": "user"|"bot", "message": str}
 
 def parse_response(response_text):
@@ -75,7 +78,7 @@ def convert_history_to_gemini(history):
             gemini_contents.append(types.Content(role="model", parts=[types.Part.from_text(text=msg)]))
     return gemini_contents
 
-def generate(user_message: str, history: list):
+def generate(history: list):
     client = genai.Client(
         api_key="AIzaSyDnG__ZPJYL19-rVxgaZSmFN74A7PFO4nU"
     )
@@ -95,9 +98,7 @@ def generate(user_message: str, history: list):
         contents=contents,
         config=generate_content_config,
     )
-    print("---------HISTORY-----------------------")
-    print(contents)
-    print("--------------------------------")
+
     response_text = response.candidates[0].content.parts[0].text
     print("--------------------------------")
     print(response_text)
@@ -111,7 +112,10 @@ def generate(user_message: str, history: list):
 
 @app.post("/send_message")
 async def send_message(request: MessageRequest):
-    bot_message, bot_action = generate(request.message, request.history)
+    print("---------HISTORY-----------------------")
+    print(request.history)
+    print("--------------------------------")
+    bot_message, bot_action = generate( request.history)
     return JSONResponse({"bot_message": bot_message, "bot_action": bot_action})
 
 if __name__ == "__main__":
